@@ -1,8 +1,209 @@
-import { useState } from 'react';
-import type { AuditResult, PolicyEvaluation } from '@/lib/agent/types';
-import type { NegotiationProposal } from '@/lib/agent/negotiate';
-export function NegotiationPolicy({ ceiling, monthlyLimit, spend, audit, policy, proposal, discount, busy, settled, onLimits, onDiscount, onApprove, onProceed }: { ceiling: number; monthlyLimit: number; spend: number; audit: AuditResult | null; policy: PolicyEvaluation | null; proposal: NegotiationProposal | null; discount: number; busy: boolean; settled: boolean; onLimits: (ceiling: number, monthly: number) => void; onDiscount: (percent: number) => void; onApprove: () => void; onProceed: () => void }) {
-  const [copyStatus, setCopyStatus] = useState('');
-  async function copy() { try { await navigator.clipboard.writeText(proposal?.counterOfferText ?? ''); setCopyStatus('Copied to clipboard'); } catch { setCopyStatus('Copy unavailable. Select the note below and copy it manually.'); } }
-  return <div className="module-content"><div className="module-columns"><section className="surface"><h3>Policy Rules</h3><label htmlFor="ceiling">Autonomous Ceiling (USD)</label><input id="ceiling" type="number" min="0" step="1" value={ceiling} disabled={busy} onChange={e => onLimits(Math.max(0, Number(e.target.value)), monthlyLimit)} /><label htmlFor="velocity">Monthly Velocity Limit (USD)</label><input id="velocity" type="number" min="0" step="1" value={monthlyLimit} disabled={busy} onChange={e => onLimits(ceiling, Math.max(0, Number(e.target.value)))} /><p className="muted-text">Session spend: ${spend.toFixed(2)} · Monthly budget usage is simulated.</p><div className="guardrails"><p>✓ Risk block: rejected audits cannot settle</p><p>{audit ? audit.passed ? '✓ Audit passed' : '⚠ Audit requires review' : '○ Awaiting invoice audit'}</p><p>✓ Ceiling and velocity checked before capture</p></div></section><section className="surface" aria-live="polite"><h3>Policy Evaluation</h3>{policy ? <><span className={`pill ${policy.decision === 'autonomous_settle' ? 'green' : 'amber'}`}>{{ autonomous_settle: 'Autonomous Clearance', human_escalation: 'Human Escalation', blocked: 'Blocked' }[policy.decision]}</span>{policy.reasoning.map(reason => <p key={reason}>{reason}</p>)}{policy.escalated && <p className="muted-text">Approval required from Finance Controller.</p>}</> : <p>Run an invoice audit to evaluate policy.</p>}</section></div>{proposal && <section className="surface"><div className="section-heading"><h3>Autonomous Terms &amp; Negotiation Engine</h3><label>Proposed early-payment discount <select value={discount} disabled={busy} onChange={e => { setCopyStatus(''); onDiscount(Number(e.target.value)); }}>{[2, 3, 5].map(value => <option key={value} value={value}>{value}%</option>)}</select></label></div><div className="metrics"><div className="metric"><span className="muted-text">Projected savings</span><div className="metric-value">${proposal.savingsAmount.toFixed(2)} <span>saved</span></div></div><div className="metric"><span className="muted-text">Proposed settlement</span><div className="metric-value">${proposal.proposedTotal.toFixed(2)}</div></div></div><p>{proposal.rationale}</p><p className="muted-text">Counter-offer and milestones are proposals. This demo assumes vendor acceptance for sandbox execution.</p>{proposal.milestones && <div className="module-columns">{proposal.milestones.map(m => <article className="metric" key={m.milestoneIndex}><span className="pill indigo">Tranche {m.milestoneIndex} · {m.percentage}%</span><h3>{m.title}</h3><strong>${m.amount.toFixed(2)}</strong><p className="muted-text">Due in {m.dueDays} days · Proposed schedule</p></article>)}</div>}<blockquote>{proposal.counterOfferText}</blockquote><button className="secondary-button" onClick={copy}>Copy counter-offer</button><span role="status" className="copy-status">{copyStatus}</span><div className="action-row">{policy?.escalated ? <button className="primary-button" disabled={busy || settled} onClick={onApprove}>{busy ? 'Settling…' : settled ? 'Already settled' : 'Approve & Settle in Sandbox'}</button> : <button className="primary-button" disabled={!policy || policy.decision === 'blocked'} onClick={onProceed}>Proceed to Sandbox Settlement →</button>}</div></section>}</div>;
+import { useState } from "react";
+import type { AuditResult, PolicyEvaluation } from "@/lib/agent/types";
+import type { NegotiationProposal } from "@/lib/agent/negotiate";
+export function NegotiationPolicy({
+  ceiling,
+  monthlyLimit,
+  spend,
+  audit,
+  policy,
+  proposal,
+  discount,
+  busy,
+  settled,
+  onLimits,
+  onDiscount,
+  onApprove,
+  onProceed,
+}: {
+  ceiling: number;
+  monthlyLimit: number;
+  spend: number;
+  audit: AuditResult | null;
+  policy: PolicyEvaluation | null;
+  proposal: NegotiationProposal | null;
+  discount: number;
+  busy: boolean;
+  settled: boolean;
+  onLimits: (ceiling: number, monthly: number) => void;
+  onDiscount: (percent: number) => void;
+  onApprove: () => void;
+  onProceed: () => void;
+}) {
+  const [copyStatus, setCopyStatus] = useState("");
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(proposal?.counterOfferText ?? "");
+      setCopyStatus("Copied to clipboard");
+    } catch {
+      setCopyStatus(
+        "Copy unavailable. Select the note below and copy it manually.",
+      );
+    }
+  }
+  return (
+    <div className="module-content">
+      <div className="module-columns">
+        <section className="surface">
+          <h3>Policy Rules</h3>
+          <label htmlFor="ceiling">Autonomous Ceiling (USD)</label>
+          <input
+            id="ceiling"
+            type="number"
+            min="0"
+            step="1"
+            value={ceiling}
+            disabled={busy}
+            onChange={(e) =>
+              onLimits(Math.max(0, Number(e.target.value)), monthlyLimit)
+            }
+          />
+          <label htmlFor="velocity">Monthly Velocity Limit (USD)</label>
+          <input
+            id="velocity"
+            type="number"
+            min="0"
+            step="1"
+            value={monthlyLimit}
+            disabled={busy}
+            onChange={(e) =>
+              onLimits(ceiling, Math.max(0, Number(e.target.value)))
+            }
+          />
+          <p className="muted-text">
+            Session spend: ${spend.toFixed(2)} · Monthly budget usage is
+            simulated.
+          </p>
+          <div className="guardrails">
+            <p>✓ Risk block: rejected audits cannot settle</p>
+            <p>
+              {audit
+                ? audit.passed
+                  ? "✓ Audit passed"
+                  : "⚠ Audit requires review"
+                : "○ Awaiting invoice audit"}
+            </p>
+            <p>✓ Ceiling and velocity checked before capture</p>
+          </div>
+        </section>
+        <section className="surface" aria-live="polite">
+          <h3>Policy Evaluation</h3>
+          {policy ? (
+            <>
+              <span
+                className={`pill ${policy.decision === "autonomous_settle" ? "green" : "amber"}`}
+              >
+                {
+                  {
+                    autonomous_settle: "Autonomous Clearance",
+                    human_escalation: "Human Escalation",
+                    blocked: "Blocked",
+                  }[policy.decision]
+                }
+              </span>
+              {policy.reasoning.map((reason) => (
+                <p key={reason}>{reason}</p>
+              ))}
+              {policy.escalated && (
+                <p className="muted-text">
+                  Approval required from Finance Controller.
+                </p>
+              )}
+            </>
+          ) : (
+            <p>Run an invoice audit to evaluate policy.</p>
+          )}
+        </section>
+      </div>
+      {proposal && (
+        <section className="surface">
+          <div className="section-heading">
+            <h3>Autonomous Terms &amp; Negotiation Engine</h3>
+            <label>
+              Proposed early-payment discount{" "}
+              <select
+                value={discount}
+                disabled={busy}
+                onChange={(e) => {
+                  setCopyStatus("");
+                  onDiscount(Number(e.target.value));
+                }}
+              >
+                {[2, 3, 5].map((value) => (
+                  <option key={value} value={value}>
+                    {value}%
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="metrics">
+            <div className="metric">
+              <span className="muted-text">Projected savings</span>
+              <div className="metric-value">
+                ${proposal.savingsAmount.toFixed(2)} <span>saved</span>
+              </div>
+            </div>
+            <div className="metric">
+              <span className="muted-text">Proposed settlement</span>
+              <div className="metric-value">
+                ${proposal.proposedTotal.toFixed(2)}
+              </div>
+            </div>
+          </div>
+          <p>{proposal.rationale}</p>
+          <p className="muted-text">
+            Counter-offer and milestones are proposals. This demo assumes vendor
+            acceptance for sandbox execution.
+          </p>
+          {proposal.milestones && (
+            <div className="module-columns">
+              {proposal.milestones.map((m) => (
+                <article className="metric" key={m.milestoneIndex}>
+                  <span className="pill indigo">
+                    Tranche {m.milestoneIndex} · {m.percentage}%
+                  </span>
+                  <h3>{m.title}</h3>
+                  <strong>${m.amount.toFixed(2)}</strong>
+                  <p className="muted-text">
+                    Due in {m.dueDays} days · Proposed schedule
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
+          <blockquote>{proposal.counterOfferText}</blockquote>
+          <button className="secondary-button" onClick={copy}>
+            Copy counter-offer
+          </button>
+          <span role="status" className="copy-status">
+            {copyStatus}
+          </span>
+          <div className="action-row">
+            {policy?.escalated ? (
+              <button
+                className="primary-button"
+                disabled={busy || settled}
+                onClick={onApprove}
+              >
+                {busy
+                  ? "Settling…"
+                  : settled
+                    ? "Already settled"
+                    : "Approve & Settle in Sandbox"}
+              </button>
+            ) : (
+              <button
+                className="primary-button"
+                disabled={!policy || policy.decision === "blocked"}
+                onClick={onProceed}
+              >
+                Proceed to Sandbox Settlement →
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+    </div>
+  );
 }
