@@ -13,11 +13,12 @@ export function evaluatePolicy(
   auditResult: AuditResult,
   currentMonthlySpend: number,
   rules: PolicyRule[] = DEFAULT_POLICIES,
+  limits = { autonomousCeiling: 500, monthlyLimit: 2500 },
 ): PolicyEvaluation {
   const total = invoice.totalAmount || 0;
   const blocked = auditResult.riskLevel === 'rejected' || auditResult.riskScore > 65;
-  const velocityExceeded = currentMonthlySpend + total > 2500;
-  const ceilingExceeded = total > 500;
+  const velocityExceeded = currentMonthlySpend + total > limits.monthlyLimit;
+  const ceilingExceeded = total > limits.autonomousCeiling;
   const triggeredRules: string[] = [];
   const reasoning: string[] = [];
   // Mandatory guardrails remain active even when callers supply custom rule metadata.
@@ -29,10 +30,10 @@ export function evaluatePolicy(
   if (blocked) {
     trigger('risk_block', 'reject', 'risk-block', `Settlement blocked: audit risk level ${auditResult.riskLevel}, risk score ${auditResult.riskScore}.`);
   } else {
-    if (velocityExceeded) trigger('velocity_limit', 'require_human_approval', 'monthly-velocity', `Monthly velocity limit exceeded: projected spend ${currentMonthlySpend + total} exceeds the $2,500 monthly budget.`);
-    if (ceilingExceeded) trigger('threshold', 'require_human_approval', 'approval-threshold', `Invoice amount ${total} exceeds the $500 autonomous ceiling threshold.`);
+    if (velocityExceeded) trigger('velocity_limit', 'require_human_approval', 'monthly-velocity', `Monthly velocity limit exceeded: projected spend ${currentMonthlySpend + total} exceeds the ${limits.monthlyLimit} monthly budget.`);
+    if (ceilingExceeded) trigger('threshold', 'require_human_approval', 'approval-threshold', `Invoice amount ${total} exceeds the ${limits.autonomousCeiling} autonomous ceiling threshold.`);
     if (!auditResult.passed) trigger('risk_block', 'require_human_approval', 'audit-review', 'Audit did not pass; Finance Controller review is required.');
-    if (!velocityExceeded && !ceilingExceeded && auditResult.passed) trigger('threshold', 'auto_approve', 'autonomous-clearance', 'Autonomous clearance: audit passed, invoice is within the $500 autonomous ceiling and the monthly velocity limit.');
+    if (!velocityExceeded && !ceilingExceeded && auditResult.passed) trigger('threshold', 'auto_approve', 'autonomous-clearance', `Autonomous clearance: audit passed, invoice is within the ${limits.autonomousCeiling} autonomous ceiling and the monthly velocity limit.`);
   }
   const escalated = !blocked && (velocityExceeded || ceilingExceeded || !auditResult.passed);
   return {
