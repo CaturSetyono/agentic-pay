@@ -24,7 +24,7 @@ function paint(saved, systemDark = false, blocked = false) {
 }
 
 test("project exposes the required scripts and framework dependencies", () => {
-  assert.deepEqual(pkg.scripts, { dev: "next dev", build: "next build", start: "next start", lint: "eslint .", typecheck: "tsc --noEmit", test: "node --test tests/*.test.mjs" });
+  assert.deepEqual(pkg.scripts, { dev: "next dev", build: "next build", start: "next start", lint: "eslint .", typecheck: "tsc --noEmit", test: "node --experimental-strip-types --test tests/*.test.mjs" });
   for (const name of ["next", "react", "react-dom", "typescript", "tailwindcss", "@tailwindcss/postcss", "postcss", "lucide-react", "clsx", "tailwind-merge", "@types/node", "@types/react", "@types/react-dom", "eslint", "@eslint/js", "typescript-eslint"]) assert.ok({ ...pkg.dependencies, ...pkg.devDependencies }[name], name);
   assert.match(pkg.dependencies.next, /\b(15|16)\./);
   assert.equal(JSON.parse(read("tsconfig.json")).compilerOptions.strict, true);
