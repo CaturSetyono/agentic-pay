@@ -30,3 +30,27 @@ npm run dev
 ```
 
 Built with ❤️ by [Catur Setyono](https://github.com/CaturSetyono).
+
+## Foundation preview (Loop 1)
+
+Requires Node.js 20.9 or newer. The shell includes three workspace tabs,
+UTC/WIB clocks, and dark, light, and system appearance preferences. Dark is the
+default; preferences are saved under `agenticpay-theme` in local storage and
+applied before paint. Open Settings to choose the system preference.
+
+The dashboard uses sample metrics. The sandbox badge and `Sandbox-AutoMesh`
+client ID are placeholders, not a verified PayPal connection. Invoice ingestion,
+policy evaluation, negotiations, and settlement APIs are planned for later loops.
+The initial demo budget is $7,500.00 and settled volume is $3,820.00.
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm start
+```
+
+`npm test` checks configuration, design tokens, and pre-paint theme behavior,
+including system preference and unavailable storage. Tailwind CSS v4 uses the
+PostCSS plugin and CSS-defined theme tokens in `src/app/globals.css`.
