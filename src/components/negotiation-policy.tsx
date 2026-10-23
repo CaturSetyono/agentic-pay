@@ -71,7 +71,7 @@ export function NegotiationPolicy({
             }
           />
           <p className="muted-text">
-            Session spend: ${spend.toFixed(2)} · Monthly budget usage is
+            Session spend: <span className="numeric">${spend.toFixed(2)}</span> · Monthly budget usage is
             simulated.
           </p>
           <div className="guardrails">
@@ -91,7 +91,7 @@ export function NegotiationPolicy({
           {policy ? (
             <>
               <span
-                className={`pill ${policy.decision === "autonomous_settle" ? "green" : "amber"}`}
+                className={`pill ${policy.decision === "blocked" ? "ruby" : policy.decision === "autonomous_settle" ? "green" : "amber"}`}
               >
                 {
                   {
@@ -137,7 +137,7 @@ export function NegotiationPolicy({
               </select>
             </label>
           </div>
-          <div className="metrics">
+          <div className="metrics proposal-metrics">
             <div className="metric">
               <span className="muted-text">Projected savings</span>
               <div className="metric-value">
@@ -164,7 +164,7 @@ export function NegotiationPolicy({
                     Tranche {m.milestoneIndex} · {m.percentage}%
                   </span>
                   <h3>{m.title}</h3>
-                  <strong>${m.amount.toFixed(2)}</strong>
+                  <strong className="numeric">${m.amount.toFixed(2)}</strong>
                   <p className="muted-text">
                     Due in {m.dueDays} days · Proposed schedule
                   </p>

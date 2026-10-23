@@ -138,10 +138,10 @@ export function PayPalSettlement({
           </caption>
           <thead>
             <tr>
-              <th>Vendor / Transaction</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Receipt hash</th>
+              <th scope="col">Vendor / Transaction</th>
+              <th scope="col" className="numeric">Amount</th>
+              <th scope="col">Status</th>
+              <th scope="col">Receipt hash</th>
             </tr>
           </thead>
           <tbody>
@@ -149,9 +149,9 @@ export function PayPalSettlement({
               <tr key={entry.orderId}>
                 <td>
                   {entry.vendorName}
-                  <small className="block">{entry.transactionId}</small>
+                  <small className="block numeric">{entry.transactionId}</small>
                 </td>
-                <td>${entry.amount}</td>
+                <td className="numeric">${entry.amount}</td>
                 <td>
                   <span className="pill green">{entry.status}</span>
                 </td>

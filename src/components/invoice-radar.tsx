@@ -69,7 +69,7 @@ export function InvoiceRadar({
         <div className="surface">
           <span className="eyebrow">DISCREPANCY SCORER</span>
           <div
-            className={`risk-dial ${audit?.passed ? "green" : audit ? "amber" : ""}`}
+            className={`risk-dial ${audit?.riskLevel === "rejected" ? "ruby" : audit?.passed ? "green" : audit ? "amber" : ""}`}
           >
             <strong>{audit?.riskScore ?? "—"}</strong>
             <span>{audit ? labels[audit.riskLevel] : "Awaiting audit"}</span>
@@ -105,7 +105,7 @@ export function InvoiceRadar({
                 <tr>
                   {["Description", "Qty", "Unit Price", "Amount", "Status"].map(
                     (label) => (
-                      <th key={label}>{label}</th>
+                      <th key={label} scope="col" className={["Qty", "Unit Price", "Amount"].includes(label) ? "numeric" : undefined}>{label}</th>
                     ),
                   )}
                 </tr>
@@ -114,9 +114,9 @@ export function InvoiceRadar({
                 {invoice.items.map((item) => (
                   <tr key={item.id}>
                     <td>{item.description}</td>
-                    <td>{item.quantity}</td>
-                    <td>${item.unitPrice.toFixed(2)}</td>
-                    <td>${item.amount.toFixed(2)}</td>
+                    <td className="numeric">{item.quantity}</td>
+                    <td className="numeric">${item.unitPrice.toFixed(2)}</td>
+                    <td className="numeric">${item.amount.toFixed(2)}</td>
                     <td>
                       <span
                         className={`pill ${audit.discrepancies.some((d) => d.description.startsWith(item.description + ":")) ? "amber" : "green"}`}
@@ -136,7 +136,7 @@ export function InvoiceRadar({
           <div className="discrepancies">
             {audit.discrepancies.map((d, index) => (
               <article className="surface" key={index}>
-                <span className="pill amber">{d.severity}</span>
+                <span className={`pill ${d.severity === "critical" || d.severity === "high" ? "ruby" : "amber"}`}>{d.severity}</span>
                 <h3>
                   {
                     {

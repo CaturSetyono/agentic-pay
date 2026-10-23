@@ -35,8 +35,8 @@ test("design system includes required dark and light tokens", () => {
   const css = read("src/app/globals.css");
   const dark = css.split("[data-theme='light']")[0];
   const light = css.split("[data-theme='light']")[1].split("}")[0];
-  for (const token of ["#08090a", "#0e1012", "rgba(255,255,255,0.03)", "rgba(255,255,255,0.08)", "#6366f1", "#10b981", "#f59e0b", "#f43f5e"]) assert.ok(dark.includes(token), token);
-  for (const token of ["#f8fafc", "#ffffff", "#f1f5f9", "#e2e8f0", "#0f172a"]) assert.ok(light.includes(token), token);
+  for (const token of ["--background: #0a0f1d", "--panel: #0e1526", "--card: #131b2e", "--border: rgba(226,232,240,0.08)", "--foreground: #f8fafc", "--muted: #94a3b8", "--indigo: #533afd", "--primary-hover: #4434d4", "--emerald: #15be53", "--amber: #f59e0b", "--rose: #ea2261", "--accent-text: #818cf8", "--green-text: #34d399", "--amber-text: #fbbf24", "--rose-text: #f43f5e"]) assert.ok(dark.includes(token), token);
+  for (const token of ["--background: #ffffff", "--panel: #ffffff", "--card: #f8fafc", "--border: #e5edf5", "--foreground: #061b31", "--muted: #64748d", "--accent-text: #533afd", "--green-text: #108c3d", "--amber-text: #d97706", "--rose-text: #be123c"]) assert.ok(light.includes(token), token);
   assert.match(css, /@import "tailwindcss"/);
 });
 
