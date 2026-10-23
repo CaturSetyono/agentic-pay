@@ -10,6 +10,7 @@ import { InvoiceRadar } from './invoice-radar';
 import { NegotiationPolicy } from './negotiation-policy';
 import { PayPalSettlement } from './paypal-settlement';
 import { AgentStream, type AgentEvent } from './agent-stream';
+import { PipelinePlayer } from './motion/pipeline-player';
 import { sampleFigma, type SampleInvoice } from '@/data/sample-invoices';
 import { parseInvoiceText, auditInvoice } from '@/lib/agent/audit';
 import { evaluatePolicy } from '@/lib/agent/policy';
@@ -122,6 +123,7 @@ export function AppShell() {
           <article className="metric"><div className="metric-label">Policy Guardrails<ShieldCheck size={16} /></div><div className="metric-value">3<span>active rules</span></div><div className="metric-note"><span className="pill green"><Check size={12} />Enforced</span></div><div className="metric-foot"><span>Within configured boundaries</span></div></article>
         </section>
         <div className="section-heading"><h2>Commerce workspace</h2><span><span className="mini-dot" />Interactive demo · Session data</span></div>
+        <PipelinePlayer currentTab={active} />
         <div className="view-tabs" role="tablist" aria-label="Commerce views">
           {views.map((item, index) => { const Icon = item.icon; return <button key={item.stage} ref={(element) => { tabRefs.current[index] = element; }} id={`tab-${index}`} role="tab" aria-selected={active === index} aria-controls={`panel-${index}`} tabIndex={active === index ? 0 : -1} className={cn("view-tab", active === index && "selected")} onClick={() => setActive(index)} onKeyDown={(event) => navigateTabs(event, index)}><span className="tab-icon"><Icon size={19} /></span><span><strong>{item.title}</strong><small>{item.subtitle}</small></span><span className="tab-number">0{index + 1}</span></button>; })}
         </div>
