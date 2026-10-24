@@ -135,7 +135,7 @@ export function AppShell() {
           <a href="#developer">Developer</a>
         </nav>
         <div className="header-actions">
-          <Clock />
+          <div className="desktop-clock"><Clock /></div>
           <div className="header-divider" />
           <button className="icon-button" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`} title="Toggle theme">
             {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -143,14 +143,14 @@ export function AppShell() {
           <button className="icon-button" onClick={() => settings.current?.showModal()} aria-label="Open settings" title="Settings">
             <Settings2 size={18} />
           </button>
-          <a href="#workspace" className="primary-button" style={{ padding: "6px 14px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+          <a href="#workspace" className="primary-button header-demo-button">
             <span>Live Demo</span>
             <ChevronRight size={12} />
           </a>
         </div>
       </header>
 
-      <main>
+      <main className="app-main">
         {/* Surface 1: High-Trust Developer Landing Page */}
         <LandingHero onLaunchWorkspace={scrollToWorkspace} />
         <ProblemBreakdown />

@@ -31,18 +31,21 @@ test("project exposes the required scripts and framework dependencies", () => {
   assert.match(read("postcss.config.mjs"), /@tailwindcss\/postcss/);
 });
 
-test("design system includes required dark and light tokens", () => {
+test("design system uses the VibeDev-inspired light canvas and comfortable geometry", () => {
   const css = read("src/app/globals.css");
-  const dark = css.split("[data-theme='light']")[0];
-  const light = css.split("[data-theme='light']")[1].split("}")[0];
-  for (const token of ["--background: #0a0f1d", "--panel: #0e1526", "--card: #131b2e", "--border: rgba(226,232,240,0.08)", "--foreground: #f8fafc", "--muted: #94a3b8", "--indigo: #533afd", "--primary-hover: #4434d4", "--emerald: #15be53", "--amber: #f59e0b", "--rose: #ea2261", "--accent-text: #818cf8", "--green-text: #34d399", "--amber-text: #fbbf24", "--rose-text: #f43f5e"]) assert.ok(dark.includes(token), token);
-  for (const token of ["--background: #ffffff", "--panel: #ffffff", "--card: #f8fafc", "--border: #e5edf5", "--foreground: #061b31", "--muted: #64748d", "--accent-text: #533afd", "--green-text: #108c3d", "--amber-text: #d97706", "--rose-text: #be123c"]) assert.ok(light.includes(token), token);
+  const root = css.split("[data-theme='dark']")[0];
+  for (const token of ["--background: #ffffff", "--panel: #ffffff", "--card: #fafafa", "--foreground: #000000", "--muted: #666666", "--border: #e5e5e5", "--primary: #111111", "--secondary: #888888", "--radius-card: 16px", "--radius-button: 12px", "--space-unit: 24px"]) assert.ok(root.includes(token), token);
+  assert.match(css, /--font-ui: "Geist"/);
+  assert.match(css, /\.landing-hero[\s\S]*padding: 72px 0 64px/);
+  assert.match(css, /\.hero-reel img[\s\S]*brightness\(\.68\)[\s\S]*opacity: 1/);
+  assert.match(css, /\.workspace-panel[\s\S]*border-radius: var\(--radius-card\)/);
+  assert.doesNotMatch(css, /background-image:\s*radial-gradient/);
   assert.match(css, /@import "tailwindcss"/);
 });
 
-test("pre-paint defaults to dark and handles invalid or blocked storage", () => {
-  for (const saved of [null, "invalid", "", "dark"]) assert.equal(paint(saved).dataset.theme, "dark");
-  assert.equal(paint("light", false, true).dataset.theme, "dark");
+test("pre-paint defaults to light and handles invalid or blocked storage", () => {
+  for (const saved of [null, "invalid", "", "light"]) assert.equal(paint(saved).dataset.theme, "light");
+  assert.equal(paint("dark", false, true).dataset.theme, "light");
 });
 
 test("pre-paint respects explicit themes and system preference", () => {
@@ -57,7 +60,24 @@ test("pre-paint respects explicit themes and system preference", () => {
 
 test("layout installs the theme initializer in head before the body", () => {
   const layout = read("src/app/layout.tsx");
-  assert.match(layout, /data-theme="dark" suppressHydrationWarning/);
+  assert.match(layout, /data-theme="light" suppressHydrationWarning/);
   assert.ok(layout.indexOf("__html: themeScript") < layout.indexOf("<body>"));
   assert.match(read("src/app/page.tsx"), /<AppShell/);
+});
+
+test("homepage integrates the reusable tilted grid hero through the shadcn ui path", () => {
+  const component = read("src/components/ui/tilted-grid-hero.tsx");
+  const hero = read("src/components/landing/landing-hero.tsx");
+  const shadcn = JSON.parse(read("components.json"));
+  assert.match(component, /export function TiltedGridHero/);
+  assert.match(component, /ResizeObserver/);
+  assert.match(hero, /@\/components\/ui\/tilted-grid-hero/);
+  assert.match(hero, /<TiltedGridHero/);
+  assert.match(hero, /hero-reel-visible/);
+  assert.match(hero, /HERO_IMAGES\.slice\(0, 3\)/);
+  assert.equal(shadcn.aliases.ui, "@/components/ui");
+  assert.equal(shadcn.tailwind.css, "src/app/globals.css");
+  const hook = read("src/lib/use-theme.ts");
+  assert.match(hook, /useState<Theme>\("light"\)/);
+  assert.match(hook, /let preference: Theme = "light"/);
 });
